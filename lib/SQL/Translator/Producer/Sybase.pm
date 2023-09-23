@@ -260,7 +260,7 @@ sub produce {
     # Indices
     #
     for my $index ($table->get_indices) {
-      push @index_defs, 'CREATE INDEX ' . $index->name . " ON $table_name (" . join(', ', $index->fields) . ")";
+      push @index_defs, create_index( $index );
     }
 
     my $drop_statement = $add_drop_table ? qq[DROP TABLE $table_name_ur] : '';
@@ -370,6 +370,41 @@ sub unreserve {
   my $unreserve = sprintf '%s_', $name;
   return $unreserve . $suffix;
 }
+
+sub create_index
+{
+  my ($index) = @_;
+
+  my $table_name = $index->table->name;
+
+  my ($index_def, @constraint_defs);
+
+  my $type = $index->type || NORMAL;
+  my @fields     =  $index->fields;
+  return unless @fields;
+
+  my %index_extras;
+  for my $opt ( $index->options ) {
+      if ( ref $opt eq 'HASH' ) {
+          foreach my $key (keys %$opt) {
+              my $value = $opt->{$key};
+              next unless defined $value;
+              if ( uc($key) eq 'USING' ) {
+                  $index_extras{using} = "USING $value";
+              }
+              elsif ( uc($key) eq 'WHERE' ) {
+                  $index_extras{where} = "WHERE $value";
+              }
+          }
+      }
+  }
+
+  my $field_names = '(' . join( ', ', $index->fields ) . ')';
+
+  return 'CREATE INDEX ' . $index->name . ' ON ' .  $index->table->name . join ' ',
+    grep { defined } $index_extras{using}, $field_names,  $index_extras{'where'} . "\n" ;
+}
+
 
 1;
 

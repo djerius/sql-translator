@@ -1,0 +1,38 @@
+schema:
+  procedures: {}
+  tables:
+    person:
+      fields:
+        name:
+          data_type: varchar
+          default_value: ~
+          extra: {}
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: name
+          order: 2
+          size:
+            - 20
+        person_id:
+          data_type: int
+          default_value: ~
+          extra: {}
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: person_id
+          order: 1
+          size:
+            - 11
+      indices:
+        - fields:
+            - name
+            - person_id
+          name: u_name_id
+          options: [ { 'where' : 'person_id is not null' } ]
+          type: UNIQUE
+      name: person
+      order: 1
+  triggers: {}
+  views: {}
